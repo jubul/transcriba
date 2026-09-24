@@ -1,0 +1,30 @@
+services:
+  transcriba:
+    build: .
+    image: transcriba:latest
+    restart: unless-stopped
+    ports: ["8000:8000"]
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?definir en .env}
+      TRANSCRIBA_ADMIN_TOKEN: ${TRANSCRIBA_ADMIN_TOKEN:?definir en .env}
+      TRANSCRIBA_PUBLIC_URL: ${TRANSCRIBA_PUBLIC_URL:-}
+    volumes:
+      - ./config:/config:ro
+      - ./data:/data
+    command: ["serve", "-c", "/config/transcriba.yaml", "--host", "0.0.0.0", "--port", "8000"]
+
+  rtmp:
+    image: tiangolo/nginx-rtmp
+    profiles: ["rtmp"]
+    restart: unless-stopped
+    ports: ["1935:1935"]
+
+  ollama:
+    image: ollama/ollama
+    profiles: ["local"]
+    restart: unless-stopped
+    ports: ["11434:11434"]
+    volumes: ["ollama:/root/.ollama"]
+
+volumes:
+  ollama: {}

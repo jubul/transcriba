@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>transcriba · ingesta de audio</title>
+<link rel="stylesheet" href="/static/common.css">
+<style>
+  main { max-width: 640px; }
+  .big { font-size: 1.1rem; padding: 14px 20px; }
+  .meter { height: 14px; }
+  #log { font-size: .8rem; color: var(--muted); white-space: pre-wrap; max-height: 200px; overflow: auto; background: var(--bg); padding: 8px; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="top"><h1>🎙 Ingesta de audio · <span id="sid"></span></h1><span class="sub"><span class="dot" id="conn"></span> <span id="conn-text">desconectado</span></span></header>
+<main>
+  <div class="card">
+    <div class="notice" id="https-warn" style="display:none">El micrófono solo funciona en https:// o en localhost. Abrí esta página por HTTPS (ver docs/OPERACION.md).</div>
+    <label>Dispositivo de entrada <select id="devices"></select></label>
+    <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="system"> Capturar audio del sistema / pestaña (Chrome: compartir pantalla con audio)</label>
+    <label>Admin token <input type="password" id="token"></label>
+    <div class="row">
+      <button class="btn primary big" id="start">▶ Empezar a enviar</button>
+      <button class="btn big" id="stop" disabled>■ Detener</button>
+    </div>
+    <div class="meter"><i id="meter"></i></div>
+    <div class="kv">
+      <span>enviado</span><b id="sent">0 s</b>
+      <span>servidor</span><b id="srv">—</b>
+    </div>
+    <div class="row"><a class="btn small" id="view" target="_blank">Ver subtítulos</a><a class="btn small" href="/admin">Panel</a></div>
+    <div id="log"></div>
+  </div>
+</main>
+<script src="/static/ingest.js"></script>
+</body>
+</html>

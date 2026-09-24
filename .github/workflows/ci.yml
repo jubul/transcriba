@@ -1,0 +1,14 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: uv venv --python 3.12 && uv pip install -e ".[dev]" ruff
+      - run: .venv/bin/python -m pytest -q
+      - run: .venv/bin/python scripts/gen_config_reference.py --check
+      - run: .venv/bin/ruff format --check transcriba tests scripts
+      - run: for f in transcriba/web/static/*.js; do node --check "$f"; done

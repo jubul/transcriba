@@ -1,0 +1,8 @@
+# Demo sin credenciales: motor mock sobre un archivo en loop. `transcriba serve -c config/demo.yaml`
+server: { title: "transcriba · demo", port: 8000, admin_token: "demo" }
+translator: { provider: mock }
+defaults: { engine: mock, source_language: en, target_languages: [es] }
+sessions:
+  - { id: sala-a, name: "Sala A · Keynote (demo)", source: samples/jfk.wav, loop: true }
+  - { id: sala-b, name: "Sala B · Workshop (demo)", source: samples/jfk.wav, loop: true }
+  - { id: sala-c, name: "Sala C · desde navegador", source: browser }

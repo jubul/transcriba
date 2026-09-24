@@ -1,0 +1,13 @@
+# Prueba con el micrófono de tu PC, con Gemini real. Requiere GEMINI_API_KEY en el entorno.
+#   transcriba serve -c config/mic.yaml
+#   → http://localhost:8000/ingest/mic   (token: mic) elegí el micrófono y "Empezar a enviar"
+#   → http://localhost:8000/view/mic?lang=both   subtítulos
+#   → http://localhost:8000/admin                nivel de audio, estado del motor
+server: { title: "Prueba de micrófono", port: 8000, admin_token: mic, data_dir: /tmp/transcriba-mic }
+defaults:
+  engine: gemini-live
+  source_language: auto          # hablá en español o inglés; traduce al otro
+  target_languages: [es, en]
+  glossary: [Nerdearla, transcriba]
+sessions:
+  - { id: mic, name: "Micrófono · navegador", source: browser }

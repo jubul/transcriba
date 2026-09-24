@@ -1,0 +1,5 @@
+# Prueba corta del motor gemini-live con rotación de sesión acelerada (normal: 540/580 s).
+# Uso: timeout -s INT 100 transcriba run samples/jfk.wav -e gemini-live -l en -t es -c config/prueba-live.yaml --loop --log-level info
+server: { data_dir: /tmp/transcriba-prueba }
+engines:
+  gemini-live: { rotate_after_s: 40, rotate_deadline_s: 50, rotate_quiet_ms: 300 }

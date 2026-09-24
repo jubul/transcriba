@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Subtítulos</title>
+<link rel="stylesheet" href="/static/common.css">
+<style>
+  :root { --size: 1; }
+  html, body { height: 100%; overflow: hidden; }
+  body { background: var(--bg); display: flex; flex-direction: column; }
+  body.light { --bg: #ffffff; --fg: #101418; --muted: #4a5568; --card: #f3f5f9; --border: #d6dbe6; }
+  body.overlay { background: transparent !important; }
+  body.overlay .lane .cap { text-shadow: 0 0 6px #000, 0 2px 2px #000, 0 0 12px #000; color: #fff; }
+  body.overlay .lane.orig .cap { color: #ddd; }
+  #stage { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding: 4vh 5vw calc(5vh + env(safe-area-inset-bottom)); gap: 1.2vh; }
+  .lane { display: flex; flex-direction: column; gap: .35em; }
+  .cap { font-size: calc(2.2rem * var(--size)); line-height: 1.3; font-weight: 600; word-wrap: break-word; }
+  .lane.orig .cap { font-size: calc(1.5rem * var(--size)); font-weight: 500; color: var(--muted); }
+  .lane.trans .cap { color: var(--fg); }
+  body.mode-orig .lane.orig .cap { font-size: calc(2.2rem * var(--size)); color: var(--fg); font-weight: 600; }
+  .cap.partial { opacity: .6; font-style: italic; }
+  .cap.pending { opacity: .5; }
+  .cap.old { opacity: .55; }
+  body.history #stage { justify-content: flex-start; overflow-y: auto; padding-top: 2vh; }
+  body.history .hist { display: grid; grid-template-columns: 5.5em 1fr; gap: 6px 14px; font-size: calc(1.05rem * var(--size)); }
+  body.history .hist .t { color: var(--muted); font-variant-numeric: tabular-nums; }
+  body.history .hist .o { color: var(--muted); }
+  body.history .hist .tr { color: var(--fg); font-weight: 500; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; opacity: 0; transition: opacity .25s; background: linear-gradient(rgba(0,0,0,.6), transparent); pointer-events: none; }
+  #bar > * { pointer-events: auto; }
+  body:hover #bar, body.show-bar #bar { opacity: 1; }
+  body.overlay #bar { display: none; }
+  #bar .name { font-weight: 600; font-size: .95rem; color: #fff; text-shadow: 0 1px 2px #000; }
+  #gear { background: rgba(0,0,0,.4); color: #fff; border: 1px solid rgba(255,255,255,.3); border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; }
+  #panel { position: fixed; top: 48px; right: 12px; width: min(340px, 92vw); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: none; flex-direction: column; gap: 10px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+  #panel.open { display: flex; }
+  #panel .row label { flex: 1; }
+  #panel input[type=range] { width: 100%; }
+  #qr { width: 160px; height: 160px; background: #fff; border-radius: 8px; padding: 6px; align-self: center; }
+  #status { position: fixed; left: 10px; bottom: 8px; font-size: .7rem; color: var(--muted); opacity: .7; }
+  body.overlay #status { display: none; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <span class="name" id="name"></span>
+  <button id="gear" title="Opciones">⚙︎ Opciones</button>
+</div>
+<div id="panel">
+  <label>Idioma
+    <select id="sel-lang"></select>
+  </label>
+  <label>Tamaño <span id="size-val"></span>
+    <input type="range" id="sel-size" min="0.5" max="3" step="0.1">
+  </label>
+  <label>Líneas visibles
+    <input type="number" id="sel-lines" min="1" max="8">
+  </label>
+  <div class="row">
+    <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="sel-light"> Fondo claro</label>
+    <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="sel-history"> Transcripción completa</label>
+  </div>
+  <div class="row">
+    <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="sel-overlay"> Overlay transparente (OBS)</label>
+  </div>
+  <div class="row">
+    <button class="btn small" id="btn-copy">Copiar enlace</button>
+    <button class="btn small" id="btn-audio" style="display:none">🔊 Escuchar traducción</button>
+    <a class="btn small" id="lnk-srt" href="#" target="_blank">Descargar SRT</a>
+  </div>
+  <img id="qr" alt="QR">
+</div>
+<div id="stage"></div>
+<div id="status"></div>
+<script src="/static/viewer.js"></script>
+</body>
+</html>

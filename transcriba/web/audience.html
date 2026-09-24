@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subtítulos en vivo</title>
+<link rel="stylesheet" href="/static/common.css">
+<style>
+  .langs { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .langs .btn { justify-content: center; }
+  .hero { text-align: center; padding: 10px 0 24px; }
+  .hero p { color: var(--muted); margin: 6px 0 0; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 id="title">Subtítulos en vivo</h1>
+  <span class="sub"><span class="dot" id="conn"></span> <span id="conn-text">conectando…</span></span>
+</header>
+<main>
+  <div class="hero">
+    <p>Elegí tu sala y el idioma en el que querés leer.</p>
+  </div>
+  <div id="sessions" class="grid"></div>
+  <div id="empty" class="empty" style="display:none">Todavía no hay sesiones en vivo.</div>
+</main>
+<footer>transcriba · subtítulos generados automáticamente · <a href="/admin">panel</a></footer>
+<script src="/static/audience.js"></script>
+</body>
+</html>

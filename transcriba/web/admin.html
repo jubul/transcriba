@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>transcriba · panel</title>
+<link rel="stylesheet" href="/static/common.css">
+<style>
+  form.new { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; align-items: end; }
+  form.new .full { grid-column: 1 / -1; }
+  .actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  details summary { cursor: pointer; color: var(--muted); font-size: .85rem; }
+  pre.info { font-size: .75rem; color: var(--muted); white-space: pre-wrap; margin: 4px 0 0; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>transcriba · panel de operación</h1>
+  <span class="sub row">
+    <input id="token" type="password" placeholder="admin token" style="width:160px">
+    <span class="dot" id="conn"></span>
+  </span>
+</header>
+<main>
+  <div id="warn" class="notice" style="display:none"></div>
+  <div class="card" style="margin-bottom:18px">
+    <h2>Nueva sesión</h2>
+    <form class="new" id="form">
+      <label>ID (url) <input name="id" required pattern="[a-z0-9][a-z0-9_-]{0,63}" placeholder="sala-a"></label>
+      <label>Nombre <input name="name" placeholder="Sala A · Keynote"></label>
+      <label>Fuente de audio <input name="source" list="sources" value="browser" required></label>
+      <datalist id="sources"><option value="browser"><option value="pulse:default"><option value="alsa:hw:0"><option value="rtmp://localhost/live/sala-a"><option value="srt://0.0.0.0:9000?mode=listener"><option value="samples/jfk.wav"></datalist>
+      <label>Motor <select name="engine" id="engine"></select></label>
+      <label>Idioma origen <input name="source_language" value="en" placeholder="en | es | auto"></label>
+      <label>Destinos (coma) <input name="target_languages" value="es"></label>
+      <label class="full">Glosario (coma) <input name="glossary" placeholder="Nerdearla, Kubernetes, sysarmy"></label>
+      <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" name="loop"> loop (archivo demo)</label>
+      <button class="btn primary" type="submit">Crear e iniciar</button>
+    </form>
+    <div class="muted" id="form-msg"></div>
+  </div>
+  <div id="sessions" class="grid"></div>
+</main>
+<footer>transcriba · <a href="/">vista de audiencia</a></footer>
+<script src="/static/admin.js"></script>
+</body>
+</html>

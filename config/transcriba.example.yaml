@@ -1,0 +1,86 @@
+# transcriba — configuración de ejemplo para una conferencia (Nerdearla-style)
+# `transcriba init` genera una versión mínima de este archivo. Referencia de claves: docs/CONFIGURACION.md
+# Las variables ${VAR} se toman del entorno o del .env que esté al lado del YAML.
+
+latency_profile: balanced                     # fast | balanced | quality (docs/LATENCIA.md)
+
+server:
+  title: "Nerdearla · Subtítulos en vivo"
+  host: 0.0.0.0
+  port: 8000
+  admin_token: ${TRANSCRIBA_ADMIN_TOKEN}      # OBLIGATORIO si el servidor es accesible desde la red
+  public_url: ${TRANSCRIBA_PUBLIC_URL:-}      # ej. https://subs.nerdearla.com (para los QR)
+  data_dir: data                              # transcripciones persistidas (JSONL) por sesión
+
+gemini:
+  api_key: ${GEMINI_API_KEY}                  # https://aistudio.google.com/apikey
+
+# Traductor de texto (para gemini-live, gemini-chunked y local)
+translator:
+  provider: gemini                            # gemini | ollama | mock | none
+  model: gemini-3.5-flash-lite
+  context_size: 6                             # frases previas como contexto
+  max_concurrency: 16                         # requests simultáneos a Gemini (todo el proceso)
+
+engines:
+  gemini-live:
+    asr_model: gemini-3.5-transcribe-live
+    mode: SMART                               # SMART = puntuación + sin muletillas; VERBATIM = literal
+    emit_partials: true                       # mostrar hipótesis parciales (latencia sub-segundo)
+    rotate_after_s: 540                       # las sesiones Live duran máx ~10 min: rotamos en una pausa
+    rotate_deadline_s: 580
+    idle_close_s: 30                          # sin audio (recesos) se cierra la sesión Live y se reabre al volver
+  gemini-chunked:
+    model: gemini-3.5-flash-lite
+    vad: { min_silence_ms: 600, max_segment_s: 8 }
+  local:
+    whisper_model: small                      # tiny|base|small|medium|large-v3-turbo
+    device: auto                              # cuda si hay GPU, si no cpu
+    vad: { min_silence_ms: 600, max_segment_s: 8 }
+
+defaults:
+  engine: gemini-live
+  source_language: en                         # 'auto' para detección automática
+  target_languages: [es]
+  glossary:                                   # se pasan como vocabulario al ASR y al traductor
+    - Nerdearla
+    - sysarmy
+    - Kubernetes
+    - Terraform
+    - Elasticsearch
+    - OpenTelemetry
+    - pull request
+  language_notes:
+    es: "Español neutro latinoamericano (usar 'ustedes', nunca 'vosotros'). Registro técnico y natural."
+
+sessions:
+  # Sala principal: audio del streaming (RTMP local, OBS → nginx-rtmp) en inglés → español
+  - id: sala-a
+    name: "Sala A · Keynotes"
+    source: rtmp://localhost/live/sala-a
+    source_language: en
+    target_languages: [es]
+
+  # Sala con laptop al lado de la consola: audio desde el navegador (/ingest/sala-b)
+  - id: sala-b
+    name: "Sala B · Workshops"
+    source: browser
+    source_language: auto                     # charlas en inglés o español
+    target_languages: [es, en]                # cada una se traduce al otro idioma
+
+  # Sala 100 % local (sin nube): Whisper + Gemma vía Ollama
+  - id: sala-c
+    name: "Sala C · Comunidad"
+    source: pulse:default
+    engine: local
+    source_language: es
+    target_languages: [en]
+    translator: { provider: ollama, model: "gemma4:e4b", ollama_url: http://localhost:11434 }
+
+  # Demo sin credenciales ni audio real (archivo en loop + motor mock)
+  - id: demo
+    name: "Demo"
+    source: samples/jfk.wav
+    loop: true
+    engine: mock
+    autostart: false

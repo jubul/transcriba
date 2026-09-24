@@ -1,0 +1,39 @@
+# --- secretos y configuración local -----------------------------------------
+.env
+.env.*
+!.env.example
+# config generada por `transcriba init`: solo referencia ${VARS}; versionarla es opcional
+transcriba.yaml
+*.pem
+*.key
+*.crt
+
+# --- datos de las salas y exportaciones -------------------------------------
+# transcripciones JSONL, meta.json y sessions.json
+data/
+*.srt
+*.vtt
+*.log
+
+# --- Python ------------------------------------------------------------------
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- JS / herramientas -------------------------------------------------------
+node_modules/
+
+# --- editores y sistema operativo -------------------------------------------
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
