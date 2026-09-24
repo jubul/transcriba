@@ -28,166 +28,164 @@ class StrictModel(BaseModel):
 
 
 class ServerConfig(StrictModel):
-    title: str = Field("Subtítulos en vivo", description="Título que ve la audiencia en la página principal.")
-    host: str = Field("0.0.0.0", description="Interfaz donde escucha el servidor. 0.0.0.0 = todas.")
-    port: int = Field(8000, description="Puerto HTTP/WebSocket.")
+    title: str = Field("Subtítulos en vivo", description="Title the audience sees on the home page.")
+    host: str = Field("0.0.0.0", description="Interface the server listens on. 0.0.0.0 = all.")
+    port: int = Field(8000, description="HTTP/WebSocket port.")
     admin_token: str = Field(
-        "", description="Token para el panel, la API de administración y la ingesta. Vacío = sin autenticación (solo para pruebas locales)."
+        "", description="Token for the panel, the admin API and the ingest. Empty = no authentication (local tests only)."
     )
     public_url: str = Field(
         "",
-        description="URL pública (https://subs.mievento.org) usada en los QR y en el banner. Vacío = la URL con la que entra cada cliente.",
+        description="Public URL (https://subs.myevent.org) used in QR codes and the banner. Empty = the URL each client uses.",
     )
-    data_dir: str = Field(
-        "data", description="Directorio de persistencia: transcripciones JSONL por sala y sesiones creadas desde el panel."
-    )
-    cors_origins: list[str] = Field(["*"], description="Orígenes permitidos para CORS (si otro sitio consume la API).")
-    history_size: int = Field(200, description="Subtítulos recientes que recibe un visor al conectarse.")
+    data_dir: str = Field("data", description="Persistence directory: JSONL transcripts per room and rooms created from the panel.")
+    cors_origins: list[str] = Field(["*"], description="Allowed CORS origins (when another site consumes the API).")
+    history_size: int = Field(200, description="Recent captions a viewer receives on connect.")
 
 
 class VadConfig(StrictModel):
-    frame_ms: int = Field(30, description="Tamaño de la ventana de análisis en ms.")
-    min_silence_ms: int = Field(600, description="Silencio necesario para cerrar una frase. Menos = frases más cortas y rápidas.")
-    min_segment_s: float = Field(1.0, description="Duración mínima de un segmento antes de cerrarlo por silencio.")
-    max_segment_s: float = Field(8.0, description="Duración máxima; al llegar se corta en la última pausa detectada.")
-    pre_roll_ms: int = Field(240, description="Audio previo al inicio de voz que se incluye para no cortar la primera sílaba.")
-    speech_threshold_db: float = Field(10.0, description="dB por encima del piso de ruido adaptativo para considerar voz.")
-    min_speech_dbfs: float = Field(-55.0, description="Nivel absoluto mínimo (dBFS) para considerar voz.")
-    min_speech_ms: int = Field(300, description="Segmentos con menos voz que esto se descartan (ruidos, aplausos cortos).")
+    frame_ms: int = Field(30, description="Analysis window size in ms.")
+    min_silence_ms: int = Field(600, description="Silence needed to close a sentence. Less = shorter, quicker sentences.")
+    min_segment_s: float = Field(1.0, description="Minimum segment length before closing it on silence.")
+    max_segment_s: float = Field(8.0, description="Maximum length; when reached, the cut happens at the last detected pause.")
+    pre_roll_ms: int = Field(240, description="Audio before speech onset included so the first syllable is not cut.")
+    speech_threshold_db: float = Field(10.0, description="dB above the adaptive noise floor to count as speech.")
+    min_speech_dbfs: float = Field(-55.0, description="Absolute minimum level (dBFS) to count as speech.")
+    min_speech_ms: int = Field(300, description="Segments with less speech than this are discarded (noises, short applause).")
 
 
 class GeminiConfig(StrictModel):
-    api_key: str = Field("", description="API key de Google AI Studio. Vacío = usar GEMINI_API_KEY o GOOGLE_API_KEY del entorno.")
-    vertexai: bool = Field(False, description="Usar Vertex AI (credenciales de Google Cloud) en lugar de API key.")
-    project: str = Field("", description="Proyecto de Google Cloud (solo Vertex AI).")
-    location: str = Field("", description="Región de Vertex AI, por ejemplo us-central1.")
+    api_key: str = Field("", description="Google AI Studio API key. Empty = use GEMINI_API_KEY or GOOGLE_API_KEY from the environment.")
+    vertexai: bool = Field(False, description="Use Vertex AI (Google Cloud credentials) instead of an API key.")
+    project: str = Field("", description="Google Cloud project (Vertex AI only).")
+    location: str = Field("", description="Vertex AI region, for example us-central1.")
 
     def resolve_api_key(self) -> str | None:
         return self.api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or None
 
 
 class LiveSessionConfig(StrictModel):
-    rotate_after_s: float = Field(540.0, description="Desde este momento se busca una pausa del orador para abrir una sesión nueva.")
-    rotate_deadline_s: float = Field(580.0, description="Se rota sí o sí al llegar aquí, aunque el orador siga hablando.")
-    rotate_quiet_ms: int = Field(400, description="Cuánto silencio cuenta como pausa para rotar.")
-    drain_timeout_s: float = Field(3.0, description="Espera máxima de los últimos finales al rotar o detener.")
+    rotate_after_s: float = Field(540.0, description="From this point on, wait for a pause of the speaker to open a new session.")
+    rotate_deadline_s: float = Field(580.0, description="Rotate no matter what when this is reached, even mid-sentence.")
+    rotate_quiet_ms: int = Field(400, description="How much silence counts as a pause for rotating.")
+    drain_timeout_s: float = Field(3.0, description="Maximum wait for the last finals when rotating or stopping.")
     idle_close_s: float = Field(
-        30.0, description="Sin audio durante este tiempo se cierra la sesión Live; se reabre sola al volver el audio."
+        30.0, description="Without audio for this long the Live session is closed; it reopens by itself when audio returns."
     )
-    reconnect_backoff_s: float = Field(1.0, description="Espera inicial antes de reconectar tras un error.")
-    reconnect_backoff_max_s: float = Field(20.0, description="Espera máxima entre reintentos (crece exponencialmente).")
+    reconnect_backoff_s: float = Field(1.0, description="Initial wait before reconnecting after an error.")
+    reconnect_backoff_max_s: float = Field(20.0, description="Maximum wait between retries (grows exponentially).")
 
 
 class GeminiLiveConfig(LiveSessionConfig):
-    asr_model: str = Field("gemini-3.5-transcribe-live", description="Modelo de transcripción en streaming del Live API.")
+    asr_model: str = Field("gemini-3.5-transcribe-live", description="Streaming transcription model of the Live API.")
     mode: Literal["VERBATIM", "SMART"] = Field(
-        "SMART", description="SMART = puntuación y sin muletillas (mejor para subtítulos); VERBATIM = literal."
+        "SMART", description="SMART = punctuation and no fillers (best for subtitles); VERBATIM = literal."
     )
     emit_partials: bool = Field(
-        True, description="Mostrar hipótesis parciales mientras el orador habla (latencia sub-segundo en el idioma original)."
+        True, description="Show interim hypotheses while the speaker talks (sub-second latency in the original language)."
     )
-    start_sensitivity: Literal["default", "high", "low"] = Field(
-        "default", description="Sensibilidad del inicio de voz del VAD del modelo."
-    )
+    start_sensitivity: Literal["default", "high", "low"] = Field("default", description="Speech-onset sensitivity of the model's VAD.")
     end_sensitivity: Literal["default", "high", "low"] = Field(
-        "default", description="Sensibilidad del fin de voz: high cierra frases antes (más rápido, más cortas)."
+        "default", description="End-of-speech sensitivity: high closes sentences earlier (faster, shorter)."
     )
-    silence_duration_ms: int | None = Field(None, description="Silencio que el modelo considera fin de frase. Vacío = valor del modelo.")
-    prefix_padding_ms: int | None = Field(
-        None, description="Audio previo que el modelo conserva al detectar inicio de voz. Vacío = valor del modelo."
-    )
+    silence_duration_ms: int | None = Field(None, description="Silence the model takes as end of sentence. Empty = model default.")
+    prefix_padding_ms: int | None = Field(None, description="Audio before speech onset the model keeps. Empty = model default.")
     final_chunk_timeout_s: float = Field(
-        1.5, description="Los finales llegan en trozos: si el trozo termina una oración, se confirma tras esta espera sin novedades."
+        1.5, description="Finals arrive in pieces: when a piece ends a sentence, it is committed after this wait without news."
     )
     final_chunk_max_wait_s: float = Field(
-        4.0, description="Si el trozo quedó a mitad de oración, se espera hasta esto por el resto antes de confirmar."
+        4.0, description="When a piece stopped mid-sentence, wait up to this for the rest before committing."
     )
 
 
 class GeminiLiveTranslateConfig(LiveSessionConfig):
-    model: str = Field("gemini-3.5-live-translate-preview", description="Modelo de traducción en vivo del Live API.")
-    echo_target_language: bool = Field(True, description="Si el orador ya habla en el idioma destino, pasar su voz/texto sin traducir.")
+    model: str = Field("gemini-3.5-live-translate-preview", description="Live translation model of the Live API.")
+    echo_target_language: bool = Field(
+        True, description="If the speaker already speaks the target language, pass speech/text through untranslated."
+    )
     stream_audio: bool = Field(
-        True, description="Retransmitir el audio traducido (PCM 24 kHz) por /ws/audio/<sala> para escucharlo en el visor."
+        True, description="Rebroadcast the translated audio (24 kHz PCM) on /ws/audio/<room> so it can be heard in the viewer."
     )
 
 
 class GeminiChunkedConfig(StrictModel):
-    model: str = Field("gemini-3.5-flash-lite", description="Modelo multimodal que recibe el audio.")
-    vad: VadConfig = Field(default_factory=VadConfig, description="Segmentación por energía.")
-    max_inflight: int = Field(2, description="Segmentos procesándose en paralelo por sala.")
-    timeout_s: float = Field(20.0, description="Timeout por llamada.")
+    model: str = Field("gemini-3.5-flash-lite", description="Multimodal model that receives the audio.")
+    vad: VadConfig = Field(default_factory=VadConfig, description="Energy-based segmentation.")
+    max_inflight: int = Field(2, description="Segments processed in parallel per room.")
+    timeout_s: float = Field(20.0, description="Timeout per call.")
 
 
 class LocalConfig(StrictModel):
     whisper_model: str = Field(
-        "small", description="Tamaño de Whisper: tiny | base | small | medium | large-v3 | large-v3-turbo | distil-large-v3."
+        "small", description="Whisper size: tiny | base | small | medium | large-v3 | large-v3-turbo | distil-large-v3."
     )
-    device: str = Field("auto", description="auto (GPU si hay CUDA, si no CPU) | cpu | cuda.")
-    compute_type: str = Field("default", description="Precisión de CTranslate2: default | int8 | float16 | int8_float16.")
-    beam_size: int = Field(1, description="Beam search; 1 = más rápido, 5 = algo mejor y más lento.")
-    vad: VadConfig = Field(default_factory=VadConfig, description="Segmentación por energía.")
-    max_inflight: int = Field(1, description="Segmentos en paralelo por sala (la GPU es el límite).")
+    device: str = Field("auto", description="auto (GPU when CUDA is available, else CPU) | cpu | cuda.")
+    compute_type: str = Field("default", description="CTranslate2 precision: default | int8 | float16 | int8_float16.")
+    beam_size: int = Field(1, description="Beam search; 1 = fastest, 5 = slightly better and slower.")
+    vad: VadConfig = Field(default_factory=VadConfig, description="Energy-based segmentation.")
+    max_inflight: int = Field(1, description="Segments in parallel per room (the GPU is the limit).")
 
 
 class TranslatorConfig(StrictModel):
     provider: Literal["gemini", "ollama", "mock", "none"] = Field(
-        "gemini", description="gemini (nube) | ollama (local, Gemma) | mock (pruebas) | none (solo transcribir)."
+        "gemini", description="gemini (cloud) | ollama (local, Gemma) | mock (tests) | none (transcribe only)."
     )
-    model: str = Field("gemini-3.5-flash-lite", description="Modelo: gemini-3.5-flash-lite, o para Ollama gemma4:e4b / gemma4:12b.")
-    ollama_url: str = Field("http://localhost:11434", description="URL del servidor Ollama.")
-    context_size: int = Field(6, description="Frases previas que se pasan como contexto (más = mejor coherencia, más tokens).")
-    max_concurrency: int = Field(16, description="Traducciones simultáneas en todo el proceso (protege la cuota con muchas salas).")
-    timeout_s: float = Field(20.0, description="Timeout por traducción.")
-    thinking: Literal["off", "auto"] = Field("off", description="off desactiva el razonamiento del modelo (más rápido y barato).")
-    temperature: float = Field(0.2, description="Creatividad del traductor; bajo = literal y estable.")
+    model: str = Field("gemini-3.5-flash-lite", description="Model: gemini-3.5-flash-lite, or for Ollama gemma4:e4b / gemma4:12b.")
+    ollama_url: str = Field("http://localhost:11434", description="URL of the Ollama server.")
+    context_size: int = Field(6, description="Previous sentences passed as context (more = better coherence, more tokens).")
+    max_concurrency: int = Field(16, description="Simultaneous translations in the whole process (protects the quota with many rooms).")
+    timeout_s: float = Field(20.0, description="Timeout per translation.")
+    thinking: Literal["off", "auto"] = Field("off", description="off disables the model's reasoning (faster and cheaper).")
+    temperature: float = Field(0.2, description="Translator creativity; low = literal and stable.")
 
 
 class EnginesConfig(StrictModel):
     gemini_live: GeminiLiveConfig = Field(
-        default_factory=GeminiLiveConfig, alias="gemini-live", description="Ajustes del motor gemini-live."
+        default_factory=GeminiLiveConfig, alias="gemini-live", description="Settings of the gemini-live engine."
     )
     gemini_live_translate: GeminiLiveTranslateConfig = Field(
-        default_factory=GeminiLiveTranslateConfig, alias="gemini-live-translate", description="Ajustes del motor gemini-live-translate."
+        default_factory=GeminiLiveTranslateConfig,
+        alias="gemini-live-translate",
+        description="Settings of the gemini-live-translate engine.",
     )
     gemini_chunked: GeminiChunkedConfig = Field(
-        default_factory=GeminiChunkedConfig, alias="gemini-chunked", description="Ajustes del motor gemini-chunked."
+        default_factory=GeminiChunkedConfig, alias="gemini-chunked", description="Settings of the gemini-chunked engine."
     )
-    local: LocalConfig = Field(default_factory=LocalConfig, description="Ajustes del motor local.")
+    local: LocalConfig = Field(default_factory=LocalConfig, description="Settings of the local engine.")
 
 
 class SessionDefaults(StrictModel):
-    engine: str = Field("gemini-live", description="Motor: " + " | ".join(ENGINE_NAMES) + ".")
-    source_language: str | None = Field("en", description="Idioma que se habla (en, es, pt…) o auto para detectarlo por frase.")
+    engine: str = Field("gemini-live", description="Engine: " + " | ".join(ENGINE_NAMES) + ".")
+    source_language: str | None = Field("en", description="Language spoken (en, es, pt…) or auto to detect it per sentence.")
     target_languages: list[str] = Field(
-        ["es"], description="Idiomas a los que se traduce. Un destino igual al idioma detectado se muestra sin traducir."
+        ["es"], description="Languages to translate into. A target equal to the detected language is shown untranslated."
     )
     glossary: list[str] = Field(
-        [], description="Nombres propios, sponsors, tecnologías: se pasan como vocabulario al ASR y no se traducen."
+        [], description="Proper names, sponsors, technologies: passed as vocabulary to the ASR and never translated."
     )
     language_notes: dict[str, str] = Field(
-        default_factory=lambda: dict(DEFAULT_LANGUAGE_NOTES), description="Instrucciones de estilo por idioma destino para el traductor."
+        default_factory=lambda: dict(DEFAULT_LANGUAGE_NOTES), description="Style instructions per target language for the translator."
     )
-    translator: TranslatorConfig | None = Field(None, description="Traductor por defecto para las salas (si no, el `translator` global).")
+    translator: TranslatorConfig | None = Field(None, description="Default translator for the rooms (otherwise the global `translator`).")
 
 
 class SessionConfig(StrictModel):
-    id: str = Field(..., description="Identificador para las URLs: minúsculas, números, guiones (sala-a).")
-    name: str = Field("", description="Nombre visible para la audiencia.")
+    id: str = Field(..., description="Identifier used in URLs: lowercase letters, digits, hyphens (room-a).")
+    name: str = Field("", description="Name shown to the audience.")
     source: str = Field(
         "browser",
-        description="Fuente de audio: browser | rtmp://… | srt://… | https://…m3u8 | pulse:default | alsa:hw:0 | archivo | ffmpeg:<args>.",
+        description="Audio source: browser | rtmp://… | srt://… | https://…m3u8 | pulse:default | alsa:hw:0 | file | ffmpeg:<args>.",
     )
-    source_args: list[str] = Field([], description="Argumentos extra de entrada para ffmpeg.")
-    loop: bool = Field(False, description="Repetir archivos en bucle (demos).")
-    engine: str | None = Field(None, description="Motor de esta sala (si no, defaults.engine).")
-    source_language: str | None = Field(None, description="Idioma hablado en esta sala (si no, defaults.source_language). auto = detectar.")
-    target_languages: list[str] | None = Field(None, description="Idiomas destino de esta sala (si no, defaults.target_languages).")
-    glossary: list[str] = Field([], description="Términos adicionales a los de defaults.glossary.")
-    translator: TranslatorConfig | None = Field(
-        None, description="Traductor propio de esta sala (por ejemplo ollama para una sala 100 % local)."
+    source_args: list[str] = Field([], description="Extra ffmpeg input arguments.")
+    loop: bool = Field(False, description="Loop files (demos).")
+    engine: str | None = Field(None, description="Engine of this room (otherwise defaults.engine).")
+    source_language: str | None = Field(
+        None, description="Language spoken in this room (otherwise defaults.source_language). auto = detect."
     )
-    autostart: bool = Field(True, description="Arrancar con el servidor. false = queda creada y se inicia desde el panel.")
+    target_languages: list[str] | None = Field(None, description="Target languages of this room (otherwise defaults.target_languages).")
+    glossary: list[str] = Field([], description="Terms added to defaults.glossary.")
+    translator: TranslatorConfig | None = Field(None, description="Translator of this room (for example ollama for a fully local room).")
+    autostart: bool = Field(True, description="Start with the server. false = created but started from the panel.")
 
     @field_validator("id")
     @classmethod
@@ -222,15 +220,15 @@ LATENCY_PROFILES: dict[str, dict[str, dict[str, Any]]] = {
 class AppConfig(StrictModel):
     latency_profile: LatencyProfile = Field(
         "balanced",
-        description="fast = frases cortas y rápidas; balanced = equilibrio; quality = frases completas, mejor traducción. Ajusta los parámetros de latencia que no estén fijados a mano (docs/LATENCIA.md).",
+        description="fast = short, quick sentences; balanced = middle ground; quality = complete sentences, better translation. Sets the latency parameters that are not fixed by hand (docs/LATENCY.md).",
     )
-    server: ServerConfig = Field(default_factory=ServerConfig, description="Servidor web.")
-    gemini: GeminiConfig = Field(default_factory=GeminiConfig, description="Credenciales de Gemini.")
-    engines: EnginesConfig = Field(default_factory=EnginesConfig, description="Ajustes por motor.")
-    translator: TranslatorConfig = Field(default_factory=TranslatorConfig, description="Traductor de texto global.")
-    defaults: SessionDefaults = Field(default_factory=SessionDefaults, description="Valores por defecto de las salas.")
+    server: ServerConfig = Field(default_factory=ServerConfig, description="Web server.")
+    gemini: GeminiConfig = Field(default_factory=GeminiConfig, description="Gemini credentials.")
+    engines: EnginesConfig = Field(default_factory=EnginesConfig, description="Per-engine settings.")
+    translator: TranslatorConfig = Field(default_factory=TranslatorConfig, description="Global text translator.")
+    defaults: SessionDefaults = Field(default_factory=SessionDefaults, description="Default values for the rooms.")
     sessions: list[SessionConfig] = Field(
-        [], description="Salas. También se pueden crear en caliente desde el panel (se persisten en data_dir/sessions.json)."
+        [], description="Rooms. They can also be created live from the panel (persisted to data_dir/sessions.json)."
     )
 
     def engine_for(self, s: SessionConfig) -> str:

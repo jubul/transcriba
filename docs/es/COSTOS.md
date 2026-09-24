@@ -1,5 +1,7 @@
 # Costos estimados
 
+🇬🇧 [English version](../COSTS.md)
+
 Precios tomados de https://ai.google.dev/gemini-api/docs/pricing el 2026-09-24 (verificarlos antes del evento: cambian).
 Todos los modelos usados tienen **free tier** con límites de tasa; para varias salas en paralelo conviene el tier pago.
 

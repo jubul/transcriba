@@ -1,5 +1,7 @@
 # Arquitectura
 
+🇬🇧 [English version](../ARCHITECTURE.md)
+
 ## Vista general
 
 ```

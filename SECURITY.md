@@ -1,20 +1,20 @@
-# Política de seguridad
+# Security policy
 
-## Versiones con soporte
+## Supported versions
 
-| Versión | Soporte |
+| Version | Supported |
 |---|---|
-| 0.x (rama principal) | Sí |
+| 0.x (main branch) | Yes |
 
-## Reportar una vulnerabilidad
+## Reporting a vulnerability
 
-No abras un issue público. Usá el reporte privado de GitHub: pestaña **Security → Report a vulnerability** en https://github.com/jubul/transcriba/security. Respondemos en un plazo de 7 días y coordinamos la publicación del arreglo con quien reporta.
+Do not open a public issue. Use GitHub's private reporting: **Security → Report a vulnerability** at https://github.com/jubul/transcriba/security. We answer within 7 days and coordinate the publication of the fix with the reporter.
 
-Interesa especialmente todo lo que afecte a una conferencia en vivo: acceso al panel o a la ingesta sin token, inyección de audio o de subtítulos en una sala ajena, fuga de la API key o de las transcripciones, y cualquier forma de dejar caer las salas de un evento.
+We care especially about anything that affects a live conference: access to the panel or the ingest without a token, injecting audio or captions into someone else's room, leaking the API key or the transcripts, and any way of taking down the rooms of an event.
 
-## Recomendaciones para operar
+## Operating recommendations
 
-- Configurar siempre `server.admin_token` antes de exponer el servidor a una red.
-- Servir por HTTPS con un reverse proxy; nunca exponer el puerto directo a Internet.
-- La API key de Gemini va en `.env` (ignorado por git), no en el YAML ni en capturas de pantalla.
-- `data/` contiene las transcripciones: respaldarlo y tratarlo como contenido del evento.
+- Always set `server.admin_token` before exposing the server to a network.
+- Serve over HTTPS behind a reverse proxy; never expose the raw port to the Internet.
+- The Gemini API key belongs in `.env` (ignored by git), not in the YAML or in screenshots.
+- `data/` holds the transcripts: back it up and treat it as event content.

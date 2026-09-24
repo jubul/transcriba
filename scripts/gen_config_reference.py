@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import importlib.util
 import sys
 import typing
 from pathlib import Path
@@ -8,12 +9,41 @@ from pathlib import Path
 from pydantic import BaseModel
 from pydantic_core import PydanticUndefined
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from transcriba.config import AppConfig, LATENCY_PROFILES
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from transcriba.config import LATENCY_PROFILES, AppConfig
 
-OUT = Path(__file__).resolve().parents[1] / "docs" / "CONFIGURACION.md"
+_spec = importlib.util.spec_from_file_location("config_reference_es", ROOT / "scripts" / "config_reference_es.py")
+_es = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_es)
 
-HEADER = """# Referencia de configuración
+OUTPUTS = {"en": ROOT / "docs" / "CONFIGURATION.md", "es": ROOT / "docs" / "es" / "CONFIGURACION.md"}
+
+HEADERS = {
+    "en": """# Configuration reference
+
+🇦🇷 [Versión en español](es/CONFIGURACION.md)
+
+> Generated from `transcriba/config.py` by `python scripts/gen_config_reference.py`. Do not edit by hand.
+
+The file is YAML. Unknown keys are errors (so a typo cannot slip through). `${VAR}` and `${VAR:-default}` are replaced with environment variables; the `.env` file next to the YAML is loaded automatically.
+
+Keys under `engines` accept hyphens or underscores (`gemini-live` or `gemini_live`).
+
+Minimal example:
+
+```yaml
+gemini: { api_key: ${GEMINI_API_KEY} }
+server: { admin_token: ${TRANSCRIBA_ADMIN_TOKEN} }
+defaults: { source_language: en, target_languages: [es] }
+sessions:
+  - { id: room-a, name: "Room A", source: browser }
+```
+
+""",
+    "es": """# Referencia de configuración
+
+🇬🇧 [English version](../CONFIGURATION.md)
 
 > Generado automáticamente desde `transcriba/config.py` con `python scripts/gen_config_reference.py`. No editar a mano.
 
@@ -31,85 +61,141 @@ sessions:
   - { id: sala-a, name: "Sala A", source: browser }
 ```
 
-"""
+""",
+}
+
+SECTION_NOTES = {
+    "en": {
+        "AppConfig": "Root of the configuration file.",
+        "ServerConfig": "Web server: ports, authentication, persistence.",
+        "GeminiConfig": "Gemini credentials (AI Studio API key or Vertex AI).",
+        "EnginesConfig": "Settings of each engine. Only the one in use needs touching.",
+        "GeminiLiveConfig": "`gemini-live` engine: streaming transcription + text translator. Inherits the Live session lifecycle (rotation, drain, idle).",
+        "GeminiLiveTranslateConfig": "`gemini-live-translate` engine: a single model, speech → translated speech + transcripts.",
+        "GeminiChunkedConfig": "`gemini-chunked` engine: WAV segments → generate_content (transcribes and translates in one call).",
+        "VadConfig": "Energy-based voice activity detector used by the segment-based engines (gemini-chunked, local, mock).",
+        "LocalConfig": "`local` engine: faster-whisper for transcription + Ollama (Gemma) for translation.",
+        "TranslatorConfig": "Text translator used by gemini-live, gemini-chunked (extra targets) and local.",
+        "SessionDefaults": "Defaults for every room; each room can override them.",
+        "SessionConfig": "One room.",
+    },
+    "es": _es.SECTION_NOTES,
+}
+
+WORDS = {
+    "en": {
+        "str": "text",
+        "int": "integer",
+        "float": "number",
+        "bool": "boolean",
+        "list": "list of",
+        "dict": "map",
+        "required": "**required**",
+        "section": "(section)",
+        "object": "(object)",
+        "see": "(see description)",
+        "empty": "empty",
+        "cols": "| Key | Type | Default | Description |",
+        "profiles": "## Latency profiles",
+        "profiles_intro": "`latency_profile` sets these values unless they are written by hand in the YAML:",
+        "profiles_cols": "| Profile | gemini-live | VAD (chunked/local) | translator |",
+        "defaults": "default values",
+    },
+    "es": {
+        "str": "texto",
+        "int": "entero",
+        "float": "número",
+        "bool": "booleano",
+        "list": "lista de",
+        "dict": "mapa",
+        "required": "**obligatorio**",
+        "section": "(sección)",
+        "object": "(objeto)",
+        "see": "(ver descripción)",
+        "empty": "vacío",
+        "cols": "| Clave | Tipo | Default | Descripción |",
+        "profiles": "## Perfiles de latencia",
+        "profiles_intro": "`latency_profile` fija estos valores salvo que estén escritos a mano en el YAML:",
+        "profiles_cols": "| Perfil | gemini-live | VAD (chunked/local) | translator |",
+        "defaults": "valores por defecto",
+    },
+}
 
 
-def type_name(annotation) -> str:
+def type_name(annotation, w: dict) -> str:
     origin = typing.get_origin(annotation)
     args = typing.get_args(annotation)
     if origin is typing.Union or str(origin) == "<class 'types.UnionType'>":
-        return " \\| ".join(type_name(a) for a in args if a is not type(None)) + (" \\| null" if type(None) in args else "")
+        return " \\| ".join(type_name(a, w) for a in args if a is not type(None)) + (" \\| null" if type(None) in args else "")
     if origin is typing.Literal:
         return " \\| ".join(f"`{a}`" for a in args)
     if origin in (list, typing.List):
-        return f"lista de {type_name(args[0])}" if args else "lista"
+        return f"{w['list']} {type_name(args[0], w)}" if args else w["list"].split()[0]
     if origin in (dict, typing.Dict):
-        return "mapa"
+        return w["dict"]
     if isinstance(annotation, type):
         if issubclass(annotation, BaseModel):
             return f"[{annotation.__name__}](#{annotation.__name__.lower()})"
-        return {"str": "texto", "int": "entero", "float": "número", "bool": "booleano"}.get(annotation.__name__, annotation.__name__)
+        return w.get(annotation.__name__, annotation.__name__)
     return str(annotation)
 
 
-def default_repr(field) -> str:
+def default_repr(field, w: dict) -> str:
     if field.default_factory is not None:
         try:
             val = field.default_factory()
         except TypeError:
-            return "(objeto)"
+            return w["object"]
         if isinstance(val, BaseModel):
-            return "(sección)"
-        return f"`{val}`" if not isinstance(val, dict) else "(ver descripción)"
+            return w["section"]
+        return f"`{val}`" if not isinstance(val, dict) else w["see"]
     if field.default is PydanticUndefined:
-        return "**obligatorio**"
-    return f"`{field.default}`" if field.default not in ("", None) else ('`""`' if field.default == "" else "vacío")
+        return w["required"]
+    if field.default == "":
+        return '`""`'
+    if field.default is None:
+        return w["empty"]
+    return f"`{field.default}`"
 
 
-SECTION_NOTES = {
-    "AppConfig": "Raíz del archivo de configuración.",
-    "ServerConfig": "Servidor web: puertos, autenticación, persistencia.",
-    "GeminiConfig": "Credenciales de Gemini (API key de AI Studio o Vertex AI).",
-    "EnginesConfig": "Ajustes de cada motor. Solo hace falta tocar el que se usa.",
-    "GeminiLiveConfig": "Motor `gemini-live`: transcripción en streaming + traductor de texto. Hereda el ciclo de vida de sesiones Live (rotación, drenaje, inactividad).",
-    "GeminiLiveTranslateConfig": "Motor `gemini-live-translate`: un solo modelo, voz → voz traducida + transcripciones.",
-    "GeminiChunkedConfig": "Motor `gemini-chunked`: segmentos WAV → generate_content (transcribe y traduce en una llamada).",
-    "VadConfig": "Detector de actividad de voz por energía, usado por los motores por segmentos (gemini-chunked, local, mock).",
-    "LocalConfig": "Motor `local`: faster-whisper para transcribir + Ollama (Gemma) para traducir.",
-    "TranslatorConfig": "Traductor de texto usado por gemini-live, gemini-chunked (destinos extra) y local.",
-    "SessionDefaults": "Valores por defecto para todas las salas; cada sala puede pisarlos.",
-    "SessionConfig": "Una sala.",
-}
+def description(model: type[BaseModel], name: str, field, lang: str) -> str:
+    text = field.description or ""
+    if lang == "es":
+        text = _es.DESCRIPTIONS.get(f"{model.__name__}.{name}", text)
+    return text.replace("|", "\\|")
 
 
-def render_model(model: type[BaseModel], seen: set[type], out: list[str]) -> None:
+def render_model(model: type[BaseModel], seen: set[type], out: list[str], lang: str) -> None:
     if model in seen:
         return
     seen.add(model)
+    w = WORDS[lang]
     out.append(f"## {model.__name__}\n")
-    if model.__name__ in SECTION_NOTES:
-        out.append(SECTION_NOTES[model.__name__] + "\n")
-    out.append("| Clave | Tipo | Default | Descripción |\n|---|---|---|---|")
+    note = SECTION_NOTES[lang].get(model.__name__)
+    if note:
+        out.append(note + "\n")
+    out.append(w["cols"] + "\n|---|---|---|---|")
     nested: list[type[BaseModel]] = []
     for name, field in model.model_fields.items():
         key = field.alias or name
-        out.append(f"| `{key}` | {type_name(field.annotation)} | {default_repr(field)} | {(field.description or '').replace('|', '\\|')} |")
+        out.append(f"| `{key}` | {type_name(field.annotation, w)} | {default_repr(field, w)} | {description(model, name, field, lang)} |")
         for candidate in [field.annotation, *typing.get_args(field.annotation)]:
             if isinstance(candidate, type) and issubclass(candidate, BaseModel):
                 nested.append(candidate)
     out.append("")
     for n in nested:
-        render_model(n, seen, out)
+        render_model(n, seen, out, lang)
 
 
-def build() -> str:
-    out: list[str] = [HEADER]
-    render_model(AppConfig, set(), out)
-    out.append("## Perfiles de latencia\n")
-    out.append("`latency_profile` fija estos valores salvo que estén escritos a mano en el YAML:\n")
-    out.append("| Perfil | gemini-live | VAD (chunked/local) | translator |\n|---|---|---|---|")
+def build(lang: str) -> str:
+    w = WORDS[lang]
+    out: list[str] = [HEADERS[lang]]
+    render_model(AppConfig, set(), out, lang)
+    out.append(w["profiles"] + "\n")
+    out.append(w["profiles_intro"] + "\n")
+    out.append(w["profiles_cols"] + "\n|---|---|---|---|")
     for name, preset in LATENCY_PROFILES.items():
-        fmt = lambda d: ", ".join(f"{k}={v}" for k, v in d.items()) or "valores por defecto"
+        fmt = lambda d: ", ".join(f"{k}={v}" for k, v in d.items()) or w["defaults"]
         out.append(
             f"| `{name}` | {fmt(preset.get('gemini_live', {}))} | {fmt(preset.get('vad', {}))} | {fmt(preset.get('translator', {}))} |"
         )
@@ -118,12 +204,18 @@ def build() -> str:
 
 
 if __name__ == "__main__":
-    content = build()
+    stale = []
+    for lang, path in OUTPUTS.items():
+        content = build(lang)
+        if "--check" in sys.argv:
+            if not path.exists() or path.read_text(encoding="utf-8") != content:
+                stale.append(str(path.relative_to(ROOT)))
+        else:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8")
+            print(f"written {path.relative_to(ROOT)} ({len(content.splitlines())} lines)")
+    if stale:
+        print("stale: " + ", ".join(stale) + " — run python scripts/gen_config_reference.py")
+        sys.exit(1)
     if "--check" in sys.argv:
-        if OUT.read_text(encoding="utf-8") != content:
-            print(f"{OUT} está desactualizado: correr python scripts/gen_config_reference.py")
-            sys.exit(1)
-        print("docs/CONFIGURACION.md al día")
-    else:
-        OUT.write_text(content, encoding="utf-8")
-        print(f"escrito {OUT} ({len(content.splitlines())} líneas)")
+        print("configuration reference up to date (en, es)")

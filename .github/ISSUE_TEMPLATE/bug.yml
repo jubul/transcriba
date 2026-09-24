@@ -1,46 +1,46 @@
-name: Reporte de error
-description: Algo no funciona como dice la documentación
+name: Bug report
+description: Something does not work as the documentation says
 title: "[bug] "
 labels: ["bug"]
 body:
   - type: textarea
-    id: que-paso
+    id: what-happened
     attributes:
-      label: Qué pasó
-      description: Qué esperabas y qué ocurrió. Si es durante un evento, contá cuántas salas y qué motor.
+      label: What happened
+      description: What you expected and what happened. If it was during an event, say how many rooms and which engine.
     validations:
       required: true
   - type: textarea
-    id: reproducir
+    id: reproduce
     attributes:
-      label: Cómo reproducirlo
+      label: How to reproduce
       placeholder: |
         1. transcriba serve -c …
-        2. abrir /ingest/sala-a …
+        2. open /ingest/room-a …
         3. …
     validations:
       required: true
   - type: dropdown
-    id: motor
+    id: engine
     attributes:
-      label: Motor
+      label: Engine
       options: [gemini-live, gemini-live-translate, gemini-chunked, local, mock]
     validations:
       required: true
   - type: dropdown
-    id: fuente
+    id: source
     attributes:
-      label: Fuente de audio
-      options: [browser, rtmp/srt/hls, pulse/alsa/dispositivo, archivo, otra]
+      label: Audio source
+      options: [browser, rtmp/srt/hls, pulse/alsa/device, file, other]
   - type: textarea
-    id: entorno
+    id: environment
     attributes:
-      label: Entorno
-      description: Salida de `transcriba check` y `transcriba --version`, sistema operativo, navegador si aplica.
+      label: Environment
+      description: Output of `transcriba check` and `transcriba --version`, operating system, browser if relevant.
       render: text
   - type: textarea
     id: logs
     attributes:
       label: Logs
-      description: Salida del servidor o de `transcriba run … --log-level debug`. Quitá la API key si aparece.
+      description: Server output or `transcriba run … --log-level debug`. Remove the API key if it appears.
       render: text

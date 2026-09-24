@@ -1,17 +1,19 @@
-# Historial de cambios
+# Changelog
 
-Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/); versiones según [SemVer](https://semver.org/lang/es/).
+Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
-## [Sin publicar]
+## [Unreleased]
+
+- English is now the default language of the README and documentation; Spanish versions live in `README.es.md` and `docs/es/`.
 
 ## [0.1.0] - 2026-09-24
 
-Primera versión.
+First release.
 
-- Motores `gemini-live` (transcripción en streaming + traducción con contexto), `gemini-live-translate`, `gemini-chunked`, `local` (faster-whisper + Gemma vía Ollama) y `mock`.
-- Fuentes de audio: navegador (`/ingest`), RTMP/SRT/HLS, dispositivos de captura y archivos, todo vía ffmpeg.
-- Varias salas en paralelo en un proceso; creación en caliente desde el panel con persistencia.
-- Vista de audiencia, visor (celular, pantalla, overlay OBS), panel de operación, QR por sala.
-- Exportación SRT/VTT/TXT/JSONL.
-- Asistente `transcriba init`, carga automática de `.env`, perfiles de latencia.
-- Documentación: operación para conferencias, referencia de configuración generada, latencia, costos, API, arquitectura.
+- Engines `gemini-live` (streaming transcription + translation with context), `gemini-live-translate`, `gemini-chunked`, `local` (faster-whisper + Gemma via Ollama) and `mock`.
+- Audio sources: browser (`/ingest`), RTMP/SRT/HLS, capture devices and files, all through ffmpeg.
+- Many rooms in parallel in one process; rooms created live from the panel are persisted.
+- Audience page, viewer (phone, screen, OBS overlay), operations panel, QR per room.
+- SRT/VTT/TXT/JSONL exports.
+- `transcriba init` wizard, automatic `.env` loading, latency profiles.
+- Documentation: conference operations, generated configuration reference, latency, costs, API, architecture.

@@ -1,8 +1,8 @@
-# transcriba — configuración de ejemplo para una conferencia (Nerdearla-style)
-# `transcriba init` genera una versión mínima de este archivo. Referencia de claves: docs/CONFIGURACION.md
-# Las variables ${VAR} se toman del entorno o del .env que esté al lado del YAML.
+# transcriba — example configuration for a conference (Nerdearla-style)
+# `transcriba init` generates a minimal version of this file. Key reference: docs/CONFIGURATION.md
+# ${VAR} values come from the environment or from the .env next to this YAML.
 
-latency_profile: balanced                     # fast | balanced | quality (docs/LATENCIA.md)
+latency_profile: balanced                     # fast | balanced | quality (docs/LATENCY.md)
 
 server:
   title: "Nerdearla · Subtítulos en vivo"

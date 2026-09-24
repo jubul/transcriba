@@ -1,5 +1,7 @@
 # Latencia: de qué depende y cómo ajustarla
 
+🇬🇧 [English version](../LATENCY.md)
+
 ## De dónde sale cada segundo
 
 Con el motor `gemini-live`, un subtítulo traducido recorre este camino:

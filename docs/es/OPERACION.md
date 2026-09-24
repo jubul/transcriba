@@ -1,6 +1,8 @@
 # Guía de operación para conferencias
 
-Pensada para que cualquier evento (5, 10 o 30 salas) despliegue transcriba en una tarde y lo opere con voluntarios. Complementa al [README](../README.md); la referencia de cada opción está en [CONFIGURACION.md](CONFIGURACION.md).
+🇬🇧 [English version](../OPERATIONS.md)
+
+Pensada para que cualquier evento (5, 10 o 30 salas) despliegue transcriba en una tarde y lo opere con voluntarios. Complementa al [README](../../README.es.md); la referencia de cada opción está en [CONFIGURACION.md](CONFIGURACION.md).
 
 ## 1. Una semana antes
 

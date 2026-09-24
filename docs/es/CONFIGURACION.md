@@ -1,5 +1,7 @@
 # Referencia de configuración
 
+🇬🇧 [English version](../CONFIGURATION.md)
+
 > Generado automáticamente desde `transcriba/config.py` con `python scripts/gen_config_reference.py`. No editar a mano.
 
 El archivo es YAML. Las claves desconocidas son un error (así un typo no pasa desapercibido). Los valores `${VAR}` y `${VAR:-default}` se reemplazan por variables de entorno; el archivo `.env` que esté junto al YAML se carga solo.

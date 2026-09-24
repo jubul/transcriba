@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Preguntas y ayuda para desplegar en tu conferencia
+  - name: Questions and help deploying at your conference
     url: https://github.com/jubul/transcriba/discussions
-    about: Para dudas de uso, ideas y experiencias de eventos usá Discussions.
-  - name: Reportar una vulnerabilidad
+    about: Use Discussions for usage questions, ideas and event experiences.
+  - name: Report a vulnerability
     url: https://github.com/jubul/transcriba/security/advisories/new
-    about: Reporte privado; no abras un issue público.
+    about: Private report; do not open a public issue.

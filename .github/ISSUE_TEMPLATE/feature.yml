@@ -1,20 +1,20 @@
-name: Propuesta de mejora
-description: Una funcionalidad o cambio que ayudaría a tu conferencia
-title: "[mejora] "
+name: Feature request
+description: A feature or change that would help your conference
+title: "[feature] "
 labels: ["enhancement"]
 body:
   - type: textarea
-    id: problema
+    id: problem
     attributes:
-      label: Qué problema resuelve
-      description: Contá la situación concreta en el evento (sala, público, operador) antes que la solución.
+      label: What problem it solves
+      description: Describe the concrete situation at the event (room, audience, operator) before the solution.
     validations:
       required: true
   - type: textarea
-    id: propuesta
+    id: proposal
     attributes:
-      label: Propuesta
+      label: Proposal
   - type: textarea
-    id: alternativas
+    id: alternatives
     attributes:
-      label: Alternativas consideradas
+      label: Alternatives considered

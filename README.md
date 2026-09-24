@@ -1,114 +1,118 @@
 # transcriba
 
-[![CI](https://github.com/jubul/transcriba/actions/workflows/ci.yml/badge.svg)](https://github.com/jubul/transcriba/actions/workflows/ci.yml) [![Licencia Apache-2.0](https://img.shields.io/badge/licencia-Apache--2.0-blue.svg)](LICENSE) [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776ab.svg)](pyproject.toml) [![Código de conducta](https://img.shields.io/badge/c%C3%B3digo%20de%20conducta-Contributor%20Covenant%202.1-5e0d73.svg)](CODE_OF_CONDUCT.md)
+[![CI](https://github.com/jubul/transcriba/actions/workflows/ci.yml/badge.svg)](https://github.com/jubul/transcriba/actions/workflows/ci.yml) [![License Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE) [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776ab.svg)](pyproject.toml) [![Code of conduct](https://img.shields.io/badge/code%20of%20conduct-Contributor%20Covenant%202.1-5e0d73.svg)](CODE_OF_CONDUCT.md)
 
-**Subtítulos en vivo para conferencias, a escala y open source.** Toma el audio de cada escenario y produce subtítulos en tiempo real en el idioma original y traducidos (inglés → español, español → inglés, o el par que necesites), para 5, 10 o 30 salas en paralelo. La audiencia elige sala e idioma desde el celular; la sala los muestra en pantalla o como overlay en el streaming.
+🇦🇷 [Leer en español](README.es.md)
 
-Construido sobre las capacidades de audio de **Gemini** (Live API) y con un camino **100 % local** con **Whisper + Gemma** vía Ollama. Licencia Apache-2.0. [English README](README.en.md).
+**Live captions for conferences, at scale, open source.** transcriba takes the audio of every stage and produces real-time subtitles in the original language and translated (English → Spanish, Spanish → English, or any pair you need), for 5, 10 or 30 rooms in parallel. Attendees pick a room and a language on their phones; the room shows the captions on screen or as an overlay on the stream.
+
+Built on **Gemini**'s audio capabilities (Live API), with a **fully local** path using **Whisper + Gemma** through Ollama. Apache-2.0.
 
 ```
-audio de la sala ─► transcriba ─► "…and that's why context propagation matters."   (< 1 s)
-                                  "…y por eso importa la propagación de contexto."  (~2-3 s)
+stage audio ─► transcriba ─► "…and that's why context propagation matters."   (< 1 s)
+                             "…y por eso importa la propagación de contexto."  (~2-3 s)
 ```
 
-| Documento | Para qué |
+| Document | What for |
 |---|---|
-| Este README | Qué es, instalación en 5 minutos, conceptos |
-| [docs/OPERACION.md](docs/OPERACION.md) | Runbook para desplegar y operar en una conferencia (servidor, captura por sala, día del evento, exportación) |
-| [docs/CONFIGURACION.md](docs/CONFIGURACION.md) | Referencia de cada opción del YAML (generada desde el código) |
-| [docs/LATENCIA.md](docs/LATENCIA.md) | De qué depende la velocidad y cómo ajustarla |
-| [docs/COSTOS.md](docs/COSTOS.md) | Precios por modelo y costo estimado por hora de sala y por evento |
-| [docs/API.md](docs/API.md) | REST y WebSockets para integrar otros visores o sistemas |
-| [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) | Cómo está hecho y por qué |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Entorno de desarrollo, tests, cómo agregar un motor |
-| [CHANGELOG.md](CHANGELOG.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Versiones, reporte de vulnerabilidades, convivencia |
+| This README | What it is, 5-minute install, concepts |
+| [docs/OPERATIONS.md](docs/OPERATIONS.md) | Runbook to deploy and run it at a conference (server, per-room capture, event day, exports) |
+| [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Reference of every YAML option (generated from the code) |
+| [docs/LATENCY.md](docs/LATENCY.md) | What determines speed and how to tune it |
+| [docs/COSTS.md](docs/COSTS.md) | Model prices, cost per room-hour and per event |
+| [docs/API.md](docs/API.md) | REST and WebSockets to integrate other viewers or systems |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How it is built and why |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Development setup, tests, how to add an engine |
+| [CHANGELOG.md](CHANGELOG.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Releases, vulnerability reports, community rules |
 
-## Qué resuelve
+Spanish versions of every document live in [docs/es/](docs/es/).
 
-| Necesidad | Cómo |
+## What it solves
+
+| Need | How |
 |---|---|
-| Audio en vivo → subtítulos en tiempo real | Streaming al Live API de Gemini (`gemini-3.5-transcribe-live`): hipótesis parciales en menos de un segundo, frases finales al terminar cada oración, traducción de cada frase con contexto y glosario en ~1 s. |
-| Idioma original + español (y español → inglés) | Cualquier par de idiomas por sala. Con `source_language: auto` y `target_languages: [es, en]` cada frase se traduce al otro idioma, sea cual sea el hablado. |
-| Varias sesiones en paralelo | Un proceso maneja decenas de salas. Cada sala tiene su fuente de audio, motor, idiomas y glosario; se crean, inician y paran desde el panel sin tocar las demás. |
-| Licencia OSI y guía de despliegue | Apache-2.0 y un runbook pensado para voluntarios de cualquier conferencia. |
-| Vista para la audiencia | La página principal lista las salas en vivo; cada persona elige idioma y lo lee en su teléfono. El mismo visor sirve para la pantalla de la sala y como overlay transparente en OBS. QR por sala. |
+| Live audio → real-time subtitles | Streaming to Gemini's Live API (`gemini-3.5-transcribe-live`): interim hypotheses in under a second, final sentences at each pause, translation of every sentence with context and glossary in about a second. |
+| Original language + Spanish (and Spanish → English) | Any language pair per room. With `source_language: auto` and `target_languages: [es, en]`, each sentence is translated into the other language, whichever one was spoken. |
+| Many sessions in parallel | One process handles dozens of rooms. Each room has its own audio source, engine, languages and glossary; rooms are created, started and stopped from the panel without touching the others. |
+| OSI license and deployment guide | Apache-2.0 and a runbook written for volunteers at any conference. |
+| Audience view | The home page lists the live rooms; each person picks a language and reads on their phone. The same viewer serves the room screen and works as a transparent OBS overlay. QR code per room. |
 
-## Inicio en 5 minutos
+## Get started in 5 minutes
 
-Requisitos: Python 3.10 o superior y `ffmpeg` en el PATH (`apt install ffmpeg`, `brew install ffmpeg`, o el instalador de Windows).
+Requirements: Python 3.10 or newer and `ffmpeg` on the PATH (`apt install ffmpeg`, `brew install ffmpeg`, or the Windows installer).
 
 ```bash
 git clone https://github.com/jubul/transcriba && cd transcriba
-python3 -m venv .venv && source .venv/bin/activate        # con uv: uv venv --python 3.12 && source .venv/bin/activate
-pip install -e .                                            # con uv: uv pip install -e .
+python3 -m venv .venv && source .venv/bin/activate        # with uv: uv venv --python 3.12 && source .venv/bin/activate
+pip install -e .                                            # with uv: uv pip install -e .
 
-transcriba init        # asistente: nombre del evento, API key, idiomas, cantidad de salas → transcriba.yaml + .env
-transcriba check       # verifica ffmpeg, credenciales, modelos
-transcriba serve       # levanta todo e imprime las URLs
+transcriba init        # wizard: event name, API key, languages, number of rooms → transcriba.yaml + .env
+transcriba check       # verifies ffmpeg, credentials, models
+transcriba serve       # starts everything and prints the URLs
 ```
 
-`transcriba init` pide la API key de Gemini (se crea en [aistudio.google.com/apikey](https://aistudio.google.com/apikey); los créditos de Google Developers aplican ahí), genera un token de administración y crea una sala por escenario. El `.env` resultante se carga solo cada vez que arrancás: no hay que exportar variables.
+`transcriba init` asks for a Gemini API key (create one at [aistudio.google.com/apikey](https://aistudio.google.com/apikey); Google Developers credits apply there), generates an admin token and creates one room per stage. The resulting `.env` is loaded automatically on every start: no exporting variables.
 
-Al arrancar, `serve` muestra las tres URLs que importan:
+On startup, `serve` prints the three URLs that matter:
 
-- **Audiencia**: `http://<ip>:8000/` para elegir sala e idioma.
-- **Panel**: `http://<ip>:8000/admin` para operar (pide el token del `.env`).
-- **Ingesta**: `http://<ip>:8000/ingest/<sala>` para mandar el audio desde la laptop de cada sala.
+- **Audience**: `http://<ip>:8000/` to pick a room and a language.
+- **Panel**: `http://<ip>:8000/admin` to operate (asks for the token from `.env`).
+- **Ingest**: `http://<ip>:8000/ingest/<room>` to send audio from the laptop in each room.
 
-Sin credenciales ni audio real, hay una demo completa: `transcriba serve -c config/demo.yaml` (token `demo`).
+No credentials and no real audio? There is a complete demo: `transcriba serve -c config/demo.yaml` (token `demo`).
 
-Con Docker: `cp .env.example .env`, editarlo, `docker compose up -d`. Perfiles opcionales: `--profile rtmp` levanta un servidor RTMP para recibir OBS; `--profile local` levanta Ollama.
+Docker: `cp .env.example .env`, edit it, `docker compose up -d`. Optional profiles: `--profile rtmp` adds an RTMP server to receive OBS; `--profile local` adds Ollama.
 
-## Probarlo con tu micrófono
+## Try it with your microphone
 
 ```bash
 transcriba serve -c config/mic.yaml
 ```
-Abrí `http://localhost:8000/ingest/mic?token=mic`, apretá "Empezar a enviar" y aceptá el permiso del micrófono. En otra pestaña, `http://localhost:8000/view/mic?lang=both`. Hablá en español o en inglés: primero aparece lo que dijiste y uno o dos segundos después la traducción. En WSL2 también funciona directo desde la terminal con el micrófono de Windows: `transcriba run pulse:default -e gemini-live -l es -t en`.
+Open `http://localhost:8000/ingest/mic?token=mic`, press "Empezar a enviar" (start) and allow the microphone. In another tab, `http://localhost:8000/view/mic?lang=both`. Speak Spanish or English: what you said appears first, and the translation one or two seconds later. On WSL2 it also works straight from the terminal with the Windows microphone: `transcriba run pulse:default -e gemini-live -l es -t en`.
 
-## Cómo llega el audio
+## How the audio gets in
 
-El campo `source` de cada sala acepta:
+The `source` field of each room accepts:
 
-| `source` | Caso típico |
+| `source` | Typical case |
 |---|---|
-| `browser` | Una laptop al lado de la consola abre `/ingest/<sala>` y manda el audio desde el navegador (micrófono, interfaz USB o audio del sistema). Reconecta sola si se cae el wifi. |
-| `rtmp://…`, `srt://…`, `https://…/x.m3u8` | Tomar el audio del streaming: OBS o vMix hacen push a un nginx-rtmp (incluido en el compose). |
-| `pulse:default`, `alsa:hw:1,0`, `avfoundation::0`, `dshow:audio=…` | Dispositivo de captura en la máquina donde corre transcriba (`transcriba devices` los lista). |
-| `charla.mp4`, `audio.mp3` | Archivos, reproducidos en tiempo real (`loop: true` para demos). |
-| `ffmpeg:<args>` | Cualquier cosa que ffmpeg pueda leer. |
+| `browser` | A laptop next to the mixing desk opens `/ingest/<room>` and streams from the browser (microphone, USB interface or system audio). Reconnects by itself if the wifi drops. |
+| `rtmp://…`, `srt://…`, `https://…/x.m3u8` | Take the audio from the stream: OBS or vMix push to an nginx-rtmp (bundled in the compose file). |
+| `pulse:default`, `alsa:hw:1,0`, `avfoundation::0`, `dshow:audio=…` | Capture device on the machine running transcriba (`transcriba devices` lists them). |
+| `talk.mp4`, `audio.mp3` | Files, played in real time (`loop: true` for demos). |
+| `ffmpeg:<args>` | Anything ffmpeg can read. |
 
-Todo se normaliza a PCM 16 kHz mono; ffmpeg hace el trabajo sucio.
+Everything is normalized to 16 kHz mono PCM; ffmpeg does the dirty work.
 
-## Motores y costos
+## Engines and cost
 
-Se elige por sala con `engine:`.
+Chosen per room with `engine:`.
 
-| Motor | Qué usa | Latencia | Costo por hora de sala | Cuándo |
+| Engine | What it uses | Latency | Cost per room-hour | When |
 |---|---|---|---|---|
-| `gemini-live` (recomendado) | `gemini-3.5-transcribe-live` (ASR en streaming, vocabulario personalizado) + `gemini-3.5-flash-lite` (traducción con contexto) | original < 1 s, traducción +1-2 s | ≈ US$ 0.70 | Producción. N idiomas destino. |
-| `gemini-live-translate` | `gemini-3.5-live-translate-preview`: un solo modelo, voz → voz traducida + transcripciones | 2-4 s | ≈ US$ 2.20 | Además de subtítulos querés audio traducido para auriculares (botón 🔊 en el visor). Experimental. |
-| `gemini-chunked` | VAD local → clips WAV → `gemini-3.5-flash-lite` transcribe y traduce en una llamada | 3-8 s | ≈ US$ 0.20 | Económico, funciona con el free tier, sin WebSockets. |
-| `local` | `faster-whisper` (ASR) + Gemma 4 en Ollama (traducción) | 3-8 s | US$ 0 + GPU | Sin nube. Una GPU de escritorio maneja 3-5 salas. |
-| `mock` | VAD real, texto ficticio | — | 0 | Demos, tests, ensayo de la operación. |
+| `gemini-live` (recommended) | `gemini-3.5-transcribe-live` (streaming ASR, custom vocabulary) + `gemini-3.5-flash-lite` (translation with context) | original < 1 s, translation +1-2 s | ≈ US$ 0.70 | Production. N target languages. |
+| `gemini-live-translate` | `gemini-3.5-live-translate-preview`: a single model, speech → translated speech + transcripts | 2-4 s | ≈ US$ 2.20 | You also want translated audio for headphones (🔊 button in the viewer). Experimental. |
+| `gemini-chunked` | Local VAD → WAV clips → `gemini-3.5-flash-lite` transcribes and translates in one call | 3-8 s | ≈ US$ 0.20 | Cheap, works on the free tier, no WebSockets. |
+| `local` | `faster-whisper` (ASR) + Gemma 4 on Ollama (translation) | 3-8 s | US$ 0 + GPU | No cloud. A desktop GPU handles 3-5 rooms. |
+| `mock` | Real VAD, fake text | — | 0 | Demos, tests, operations rehearsal. |
 
-Nerdearla (30 charlas × 45 min ≈ 22.5 horas de sala) cuesta **≈ US$ 16 con `gemini-live`**, dentro de los US$ 25 de crédito. Las sesiones Live solo se abren mientras llega audio, así que una sala esperando su ingesta no gasta. Detalle en [docs/COSTOS.md](docs/COSTOS.md).
+A 30-talk conference (30 × 45 min ≈ 22.5 room-hours) costs **≈ US$ 16 with `gemini-live`**, within the US$ 25 credit. Live sessions are only open while audio flows, so a room waiting for its ingest costs nothing. Details in [docs/COSTS.md](docs/COSTS.md).
 
-## Latencia
+## Latency
 
-La velocidad depende poco del modelo y mucho de **cuándo se da por terminada una frase**: el modelo espera una pausa, transcriba espera que el trozo cierre una oración, y recién entonces traduce. El texto original aparece mientras el orador habla; la traducción, uno o dos segundos después de la pausa. Un solo ajuste lo regula:
+Speed depends little on the model and a lot on **when a sentence is considered finished**: the model waits for a pause, transcriba waits for the chunk to close a sentence, and only then translates. The original text shows while the speaker talks; the translation follows one or two seconds after the pause. One setting controls it:
 
 ```yaml
-latency_profile: fast      # frases más cortas y rápidas
-latency_profile: balanced  # por defecto
-latency_profile: quality   # frases completas, mejor traducción
+latency_profile: fast      # shorter, quicker sentences
+latency_profile: balanced  # default
+latency_profile: quality   # complete sentences, better translation
 ```
 
-También `transcriba run … --latency fast` para comparar en la terminal. Qué mueve cada perfil y cómo afinar a mano: [docs/LATENCIA.md](docs/LATENCIA.md).
+Also `transcriba run … --latency fast` to compare from the terminal. What each profile changes and how to fine-tune by hand: [docs/LATENCY.md](docs/LATENCY.md).
 
-## Configuración
+## Configuration
 
-Un YAML, generado por `transcriba init` y editable a mano ([ejemplo completo](config/transcriba.example.yaml), [referencia de todas las claves](docs/CONFIGURACION.md)):
+One YAML file, generated by `transcriba init` and editable by hand ([full example](config/transcriba.example.yaml), [reference of every key](docs/CONFIGURATION.md)):
 
 ```yaml
 latency_profile: balanced
@@ -120,71 +124,74 @@ defaults:
   target_languages: [es]
   glossary: [Nerdearla, sysarmy, Kubernetes, OpenTelemetry]
 sessions:
-  - { id: sala-a, name: "Sala A · Keynotes", source: rtmp://localhost/live/sala-a }
-  - { id: sala-b, name: "Sala B · Workshops", source: browser, source_language: auto, target_languages: [es, en] }
-  - { id: sala-c, name: "Sala C", source: pulse:default, engine: local, source_language: es, target_languages: [en],
+  - { id: room-a, name: "Room A · Keynotes", source: rtmp://localhost/live/room-a }
+  - { id: room-b, name: "Room B · Workshops", source: browser, source_language: auto, target_languages: [es, en] }
+  - { id: room-c, name: "Room C", source: pulse:default, engine: local, source_language: es, target_languages: [en],
       translator: { provider: ollama, model: "gemma4:e4b" } }
 ```
 
-Las claves desconocidas son un error, así un typo no pasa desapercibido. Las salas creadas desde el panel se guardan en `data/sessions.json` y vuelven al reiniciar.
+Unknown keys are errors, so a typo cannot slip through. Rooms created from the panel are saved to `data/sessions.json` and come back after a restart.
 
-## Vistas
+## Views
 
-- **`/`** audiencia: salas en vivo con un botón por idioma. Funciona en cualquier celular.
-- **`/view/<sala>?lang=es`** visor. Parámetros: `lang=orig|es|both|…`, `size=1.4`, `lines=2`, `theme=light`, `history=1` (transcripción completa con tiempos), `overlay=1` (fondo transparente para la fuente "Navegador" de OBS). El engranaje ⚙︎ cambia todo en vivo, copia el enlace y muestra el QR.
-- **`/admin`** operación: estado, nivel de audio, subtítulos emitidos, personas viendo, últimos textos, detalles y errores del motor; crear, iniciar, parar y borrar salas; enlaces a visor, overlay, ingesta, QR y exportación SRT/TXT.
-- **`/ingest/<sala>`** ingesta desde el navegador: elegís el dispositivo, ves el nivel, y la página explica cualquier problema (token, permisos, sesión detenida).
+- **`/`** audience: live rooms with one button per language. Works on any phone.
+- **`/view/<room>?lang=es`** viewer. Parameters: `lang=orig|es|both|…`, `size=1.4`, `lines=2`, `theme=light`, `history=1` (full transcript with timestamps), `overlay=1` (transparent background for the OBS "Browser" source). The gear ⚙︎ changes everything live, copies the link and shows the QR code.
+- **`/admin`** operations: state, audio level, captions emitted, people watching, latest texts, engine details and errors; create, start, stop and delete rooms; links to viewer, overlay, ingest, QR and SRT/TXT exports.
+- **`/ingest/<room>`** browser ingest: pick the device, watch the level, and the page explains any problem (token, permissions, stopped room).
 
-## Operar varias salas
+The web UI and CLI messages are currently in Spanish (the project was born at a Latin American conference); the code, docs and configuration are in English.
 
-Cada sala es una sesión independiente dentro del mismo proceso. Se definen en el YAML o se crean en caliente desde el panel (o con `POST /api/sessions`). Parar o reiniciar una no afecta a las otras, y las transcripciones se agregan al JSONL de cada sala sin borrarse. Para el día del evento, el runbook está en [docs/OPERACION.md](docs/OPERACION.md): qué cablear, qué mirar en el panel, qué hacer si algo falla y cómo exportar al final.
+## Running many rooms
 
-Un proceso alcanza para decenas de salas con motores en la nube. Para más, o por redundancia, se levantan varios procesos (uno por track o edificio) detrás de un reverse proxy.
+Each room is an independent session inside the same process. Rooms are defined in the YAML or created on the fly from the panel (or with `POST /api/sessions`). Stopping or restarting one does not affect the others, and transcripts are appended to each room's JSONL without ever being erased. For event day, the runbook is in [docs/OPERATIONS.md](docs/OPERATIONS.md): what to wire, what to watch in the panel, what to do when something fails and how to export at the end.
 
-## 100 % local
+One process is enough for dozens of rooms with cloud engines. For more, or for redundancy, run several processes (one per track or building) behind a reverse proxy.
+
+## Fully local
 
 ```bash
-pip install -e ".[local]"          # faster-whisper; ".[cuda]" agrega las libs NVIDIA para GPU
-ollama pull gemma4:e4b              # o gemma4:12b si hay VRAM
+pip install -e ".[local]"          # faster-whisper; ".[cuda]" adds the NVIDIA libraries for GPU
+ollama pull gemma4:e4b              # or gemma4:12b if you have the VRAM
 ```
-En la sala: `engine: local` con `translator: { provider: ollama, model: gemma4:e4b }`. Whisper corre en GPU si hay CUDA y cae a CPU si faltan librerías. Gemma 4 E2B/E4B entienden audio de forma nativa; un motor Gemma-audio puro es el siguiente paso natural.
+In the room: `engine: local` with `translator: { provider: ollama, model: gemma4:e4b }`. Whisper runs on the GPU when CUDA is available and falls back to the CPU when libraries are missing. Gemma 4 E2B/E4B understand audio natively; a pure Gemma-audio engine is the natural next step.
 
 ## API
 
-REST y WebSockets documentados en [docs/API.md](docs/API.md). Cada subtítulo tiene `id` estable, `seq`, `status` (`partial` → `final` → `translated`), `original`, `language`, `translations`, `t_start`/`t_end`. Los clientes hacen *upsert* por `id`, así que construir otro visor (una app, un LED wall) son unas decenas de líneas.
+REST and WebSockets are documented in [docs/API.md](docs/API.md). Every caption has a stable `id`, a `seq`, a `status` (`partial` → `final` → `translated`), `original`, `language`, `translations`, `t_start`/`t_end`. Clients upsert by `id`, so building another viewer (an app, an LED wall) takes a few dozen lines.
 
-## Desarrollo
+## Development
 
 ```bash
 pip install -e ".[dev,local]"
 pytest -q                                      # 37 tests
-python scripts/gen_config_reference.py         # regenera docs/CONFIGURACION.md desde los modelos
+python scripts/gen_config_reference.py         # regenerates docs/CONFIGURATION.md and docs/es/CONFIGURACION.md from the models
 transcriba run samples/jfk.wav -e mock --no-realtime
 ```
-Guía en [CONTRIBUTING.md](CONTRIBUTING.md).
+Guide in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Estado y limitaciones
+## Status and limitations
 
-- Probado con audio real de micrófono contra el Live API (`gemini-live`): parciales, finales y traducción funcionan. La rotación de sesiones a los 9 minutos está probada contra un Live API simulado; falta observarla en una charla completa.
-- Los modelos Live limitan cada sesión a ~10 min: transcriba rota en una pausa del orador; en el peor caso se puede perder una frase corta en la rotación.
-- `gemini-live-translate` empareja original y traducción por orden de llegada (experimental).
-- El VAD por energía es simple a propósito; en salas muy ruidosas ajustar `vad.speech_threshold_db` o usar `gemini-live` (usa el VAD del modelo).
-- Sin base de datos: el estado vive en el proceso y en `data/<sala>/captions.jsonl` + `data/sessions.json`.
+- Tested with real microphone audio against the Live API (`gemini-live`): interim results, finals and translation work. Session rotation at 9 minutes is tested against a fake Live API; it still has to be observed during a full talk.
+- Live models cap each session at ~10 minutes: transcriba rotates during a pause of the speaker; in the worst case a short sentence can be lost at the rotation.
+- `gemini-live-translate` pairs original and translation by arrival order (experimental).
+- The energy-based VAD is simple on purpose; in very noisy rooms tune `vad.speech_threshold_db` or use `gemini-live` (it uses the model's VAD).
+- No database: state lives in the process and in `data/<room>/captions.jsonl` + `data/sessions.json`.
 
 ## Roadmap
 
-- Motor Gemma-audio puro (Gemma 4 E4B) por Transformers u Ollama: transcripción y traducción local en un solo modelo.
-- Corrección retroactiva de subtítulos con contexto largo.
-- Publicación automática de transcripciones al cierre de cada charla (Markdown/HTML).
-- Métricas Prometheus por sala (latencia, tokens, errores).
+- Pure Gemma-audio engine (Gemma 4 E4B) through Transformers or Ollama: local transcription and translation in one model.
+- Retroactive caption correction with long context.
+- Automatic publication of transcripts when each talk ends (Markdown/HTML).
+- Prometheus metrics per room (latency, tokens, errors).
+- English (and other) translations of the web UI and CLI.
 
-## Comunidad
+## Community
 
-- ¿Lo usaste o lo querés usar en tu conferencia? Contalo en [Discussions](https://github.com/jubul/transcriba/discussions): las experiencias reales de eventos son lo que más mejora el proyecto.
-- Errores y mejoras: [Issues](https://github.com/jubul/transcriba/issues) con las plantillas. Los marcados `good first issue` son un buen punto de entrada.
-- Vulnerabilidades: reporte privado según [SECURITY.md](SECURITY.md).
-- Nos regimos por el [Código de Conducta](CODE_OF_CONDUCT.md) (Contributor Covenant 2.1).
+- Used it, or planning to, at your conference? Tell us in [Discussions](https://github.com/jubul/transcriba/discussions): real event experience is what improves the project most.
+- Bugs and improvements: [Issues](https://github.com/jubul/transcriba/issues) using the templates. Those labeled `good first issue` are a good entry point.
+- Vulnerabilities: private report as described in [SECURITY.md](SECURITY.md).
+- We follow the [Code of Conduct](CODE_OF_CONDUCT.md) (Contributor Covenant 2.1).
 
-## Licencia
+## License
 
-Apache License 2.0. Hecho para que las conferencias open source sean accesibles.
+Apache License 2.0. Made so that open source conferences can be accessible.
