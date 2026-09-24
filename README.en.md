@@ -1,5 +1,7 @@
 # transcriba
 
+[![CI](https://github.com/jubul/transcriba/actions/workflows/ci.yml/badge.svg)](https://github.com/jubul/transcriba/actions/workflows/ci.yml) [![License Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE) [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776ab.svg)](pyproject.toml) [![Code of conduct](https://img.shields.io/badge/code%20of%20conduct-Contributor%20Covenant%202.1-5e0d73.svg)](CODE_OF_CONDUCT.md)
+
 **Live captions for conferences, at scale, open source.** Takes the audio of every stage and produces real-time subtitles in the original language and translated (English → Spanish, Spanish → English, or any pair), for 5, 10 or 30 rooms in parallel. Attendees pick a room and a language on their phone; the room shows them on screen or as an overlay on the stream.
 
 Built on **Gemini**'s audio capabilities (Live API), with a **fully local** path using **Whisper + Gemma** through Ollama. Apache-2.0. The detailed documentation is in Spanish ([README.md](README.md), [docs/](docs/)); this page covers what you need to get running.
@@ -23,7 +25,7 @@ stage audio ─► transcriba ─► "…and that's why context propagation matt
 Requirements: Python 3.10+ and `ffmpeg` on the PATH.
 
 ```bash
-git clone https://github.com/<your-org>/transcriba && cd transcriba
+git clone https://github.com/jubul/transcriba && cd transcriba
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
 
@@ -94,4 +96,4 @@ pip install -e ".[dev,local]"
 pytest -q                                 # 37 tests, including a fake Live API for rotation/drain/reconnect
 python scripts/gen_config_reference.py    # regenerate the config reference
 ```
-See [CONTRIBUTING.md](CONTRIBUTING.md). License: Apache-2.0.
+See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). Questions and event reports: [Discussions](https://github.com/jubul/transcriba/discussions). License: Apache-2.0.

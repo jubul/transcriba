@@ -1,5 +1,7 @@
 # transcriba
 
+[![CI](https://github.com/jubul/transcriba/actions/workflows/ci.yml/badge.svg)](https://github.com/jubul/transcriba/actions/workflows/ci.yml) [![Licencia Apache-2.0](https://img.shields.io/badge/licencia-Apache--2.0-blue.svg)](LICENSE) [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776ab.svg)](pyproject.toml) [![Código de conducta](https://img.shields.io/badge/c%C3%B3digo%20de%20conducta-Contributor%20Covenant%202.1-5e0d73.svg)](CODE_OF_CONDUCT.md)
+
 **Subtítulos en vivo para conferencias, a escala y open source.** Toma el audio de cada escenario y produce subtítulos en tiempo real en el idioma original y traducidos (inglés → español, español → inglés, o el par que necesites), para 5, 10 o 30 salas en paralelo. La audiencia elige sala e idioma desde el celular; la sala los muestra en pantalla o como overlay en el streaming.
 
 Construido sobre las capacidades de audio de **Gemini** (Live API) y con un camino **100 % local** con **Whisper + Gemma** vía Ollama. Licencia Apache-2.0. [English README](README.en.md).
@@ -19,6 +21,7 @@ audio de la sala ─► transcriba ─► "…and that's why context propagation
 | [docs/API.md](docs/API.md) | REST y WebSockets para integrar otros visores o sistemas |
 | [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) | Cómo está hecho y por qué |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Entorno de desarrollo, tests, cómo agregar un motor |
+| [CHANGELOG.md](CHANGELOG.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Versiones, reporte de vulnerabilidades, convivencia |
 
 ## Qué resuelve
 
@@ -35,7 +38,7 @@ audio de la sala ─► transcriba ─► "…and that's why context propagation
 Requisitos: Python 3.10 o superior y `ffmpeg` en el PATH (`apt install ffmpeg`, `brew install ffmpeg`, o el instalador de Windows).
 
 ```bash
-git clone https://github.com/<tu-org>/transcriba && cd transcriba
+git clone https://github.com/jubul/transcriba && cd transcriba
 python3 -m venv .venv && source .venv/bin/activate        # con uv: uv venv --python 3.12 && source .venv/bin/activate
 pip install -e .                                            # con uv: uv pip install -e .
 
@@ -174,6 +177,13 @@ Guía en [CONTRIBUTING.md](CONTRIBUTING.md).
 - Corrección retroactiva de subtítulos con contexto largo.
 - Publicación automática de transcripciones al cierre de cada charla (Markdown/HTML).
 - Métricas Prometheus por sala (latencia, tokens, errores).
+
+## Comunidad
+
+- ¿Lo usaste o lo querés usar en tu conferencia? Contalo en [Discussions](https://github.com/jubul/transcriba/discussions): las experiencias reales de eventos son lo que más mejora el proyecto.
+- Errores y mejoras: [Issues](https://github.com/jubul/transcriba/issues) con las plantillas. Los marcados `good first issue` son un buen punto de entrada.
+- Vulnerabilidades: reporte privado según [SECURITY.md](SECURITY.md).
+- Nos regimos por el [Código de Conducta](CODE_OF_CONDUCT.md) (Contributor Covenant 2.1).
 
 ## Licencia
 

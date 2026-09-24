@@ -1,0 +1,46 @@
+name: Reporte de error
+description: Algo no funciona como dice la documentación
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: que-paso
+    attributes:
+      label: Qué pasó
+      description: Qué esperabas y qué ocurrió. Si es durante un evento, contá cuántas salas y qué motor.
+    validations:
+      required: true
+  - type: textarea
+    id: reproducir
+    attributes:
+      label: Cómo reproducirlo
+      placeholder: |
+        1. transcriba serve -c …
+        2. abrir /ingest/sala-a …
+        3. …
+    validations:
+      required: true
+  - type: dropdown
+    id: motor
+    attributes:
+      label: Motor
+      options: [gemini-live, gemini-live-translate, gemini-chunked, local, mock]
+    validations:
+      required: true
+  - type: dropdown
+    id: fuente
+    attributes:
+      label: Fuente de audio
+      options: [browser, rtmp/srt/hls, pulse/alsa/dispositivo, archivo, otra]
+  - type: textarea
+    id: entorno
+    attributes:
+      label: Entorno
+      description: Salida de `transcriba check` y `transcriba --version`, sistema operativo, navegador si aplica.
+      render: text
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Salida del servidor o de `transcriba run … --log-level debug`. Quitá la API key si aparece.
+      render: text
